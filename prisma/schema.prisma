@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  password String
+  isAdmin Boolean @default(false)
+  PermanentAddress String?
+  firstName String?
+  lastName String?
+  mobile String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+  cart Cart?
+  saveditem SavedItem?
+  ratingreviews Ratingreview[]
+
+  @@map("users")
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  productname String
+  brandname String
+  price String
+  rating Int?
+  featuredproduct Boolean @default(false)
+  quantity Int
+  itembuy Int @default(1)
+  image String
+  description String
+  incarted Boolean @default(false)
+
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  brandId Int
+  brand Brand @relation(fields: [brandId], references: [id])
+  carts CartOnProduct[]
+  orders Order[]
+  saveditems SavedItem[]
+  ratingreviews Ratingreview[]
+
+  @@map("products")
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  products Product[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id Int @id @default(autoincrement())
+  title String
+  description String
+  products Product[]
+
+  @@map("brands")
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+  ordernumber Int @unique
+  itemnumber Int
+  totalprice String
+  paymentmethod String
+  deliverymethod String
+  deliveryfee String
+  shippedaddress String
+  createdAt DateTime @default(now())
+
+  products Product[]
+  userId Int
+  user User @relation(fields: [userId],references: [id])
+
+  @@map("orders")
+}
+
+model Cart {
+  id Int @id @default(autoincrement())
+
+  products CartOnProduct[]
+  userId Int @unique
+  user User @relation(fields: [userId],references: [id])
+
+  @@map("carts")
+}
+
+model CartOnProduct {
+  id Int @id @default(autoincrement())
+  product Product @relation(fields: [productId], references: [id])
+  productId Int
+  cart Cart @relation(fields: [cartId], references: [id])
+  cartId Int
+  quantity Int
+
+  @@unique([productId,cartId])
+}
+
+model SavedItem {
+  id Int @id @default(autoincrement())
+  itemnumber String?
+
+  products Product[]
+  userId Int @unique
+  user User @relation(fields: [userId],references: [id])
+
+  @@map("saveditems")
+}
+
+model Ratingreview {
+  id Int @id @default(autoincrement())
+  rating String
+  title String?
+  comment String?
+  createdAt DateTime @default(now())
+
+  productId Int
+  product Product @relation(fields: [productId],references: [id])
+  userId Int
+  user User @relation(fields: [userId],references: [id])
+
+  @@map("ratingreviews")
+}
