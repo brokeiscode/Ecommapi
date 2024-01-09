@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authProtect = require("../middleware/auth");
+const authAdmin = require("../middleware/authAdmin");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -48,6 +50,20 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-//POST a category
+//POST many categories
+router.post("/", [authProtect, authAdmin], async (req, res) => {
+  const { categoriesData } = req.body;
+  try {
+    const manycategories = await prisma.category.createMany({
+      data: { categoriesData },
+    });
+    return res.json(manycategories);
+  } catch (error) {
+    return res.status(400).json({
+      msg: "Something went wrong",
+      error,
+    });
+  }
+});
 
 module.exports = router;
