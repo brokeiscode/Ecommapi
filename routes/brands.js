@@ -55,7 +55,10 @@ router.post("/", [authProtect, authAdmin], async (req, res) => {
   const { brandsData } = req.body;
   try {
     const manybrands = await prisma.brand.createMany({
-      data: { brandsData },
+      data: brandsData.map((item) => ({
+        title: item.title,
+        description: item.description,
+      })),
     });
     return res.json(manybrands);
   } catch (error) {

@@ -41,7 +41,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //POST a product
-router.post("/", [authProtect, authAdmin], async (req, res) => {
+router.post("/single", [authProtect, authAdmin], async (req, res) => {
   const {
     productname,
     brandname,
@@ -69,6 +69,32 @@ router.post("/", [authProtect, authAdmin], async (req, res) => {
     });
     // console.log(req.user);
     return res.json(aproduct);
+  } catch (error) {
+    return res.status(400).json({
+      msg: "Something went wrong",
+      error,
+    });
+  }
+});
+
+//POST a product
+router.post("/many", [authProtect, authAdmin], async (req, res) => {
+  const { productsData } = req.body;
+  try {
+    const manyproduct = await prisma.product.createMany({
+      data: productsData.map((item) => ({
+        productname: item.productname,
+        brandname: item.brandname,
+        price: item.price,
+        rating: item.rating,
+        quantity: item.quantity,
+        image: item.image,
+        description: item.description,
+        categoryId: item.categoryId,
+        brandId: item.brandId,
+      })),
+    });
+    return res.json(manyproduct);
   } catch (error) {
     return res.status(400).json({
       msg: "Something went wrong",

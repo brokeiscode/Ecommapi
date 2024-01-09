@@ -55,7 +55,10 @@ router.post("/", [authProtect, authAdmin], async (req, res) => {
   const { categoriesData } = req.body;
   try {
     const manycategories = await prisma.category.createMany({
-      data: { categoriesData },
+      data: categoriesData.map((item) => ({
+        title: item.title,
+        description: item.description,
+      })),
     });
     return res.json(manycategories);
   } catch (error) {
