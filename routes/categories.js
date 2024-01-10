@@ -51,7 +51,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //POST many categories
-router.post("/", [authProtect, authAdmin], async (req, res) => {
+router.post("/many/", [authProtect, authAdmin], async (req, res) => {
   const { categoriesData } = req.body;
   try {
     const manycategories = await prisma.category.createMany({

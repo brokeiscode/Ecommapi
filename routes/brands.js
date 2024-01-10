@@ -51,7 +51,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //POST many brands
-router.post("/", [authProtect, authAdmin], async (req, res) => {
+router.post("/many/", [authProtect, authAdmin], async (req, res) => {
   const { brandsData } = req.body;
   try {
     const manybrands = await prisma.brand.createMany({

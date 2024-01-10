@@ -41,7 +41,7 @@ router.get("/:id", async (req, res) => {
 });
 
 //POST a product
-router.post("/single", [authProtect, authAdmin], async (req, res) => {
+router.post("/single/", [authProtect, authAdmin], async (req, res) => {
   const {
     productname,
     brandname,
@@ -77,8 +77,8 @@ router.post("/single", [authProtect, authAdmin], async (req, res) => {
   }
 });
 
-//POST a product
-router.post("/many", [authProtect, authAdmin], async (req, res) => {
+//POST many product
+router.post("/many/", [authProtect, authAdmin], async (req, res) => {
   const { productsData } = req.body;
   try {
     const manyproduct = await prisma.product.createMany({
