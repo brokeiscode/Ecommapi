@@ -10,7 +10,6 @@ const {
 
 //GET checkout
 router.get("/", authProtect, async (req, res) => {
-  if (!req.user) return;
   try {
     const checkout = await prisma.checkout.findUnique({
       where: {

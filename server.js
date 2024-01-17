@@ -7,7 +7,7 @@ const users = require("./routes/users");
 const auth = require("./routes/auth");
 const cart = require("./routes/cart");
 const checkout = require("./routes/checkout");
-const orders = require("./routes/orders");
+const order = require("./routes/orders");
 const config = require("config");
 const app = express();
 
@@ -20,7 +20,7 @@ app.use("/users", users);
 app.use("/auth", auth);
 app.use("/cart", cart);
 app.use("/checkout", checkout);
-app.use("/orders", orders);
+app.use("/order", order);
 
 console.log("Direct NODE_ENV", process.env.NODE_ENV);
 console.log("app.get", app.get("env"));

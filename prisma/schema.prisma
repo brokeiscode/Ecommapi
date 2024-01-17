@@ -78,8 +78,6 @@ model Brand {
 model OrderItem {
   id Int @id @default(autoincrement())
   quantity Int
-  Amount Int
-  TotalAmount Int
   createdAt DateTime @default(now())
 
   productId Int

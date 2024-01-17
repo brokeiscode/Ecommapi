@@ -14,9 +14,8 @@ const auth = (req, res, next) => {
       return res.status(401).send("Invalid token. You need to login");
     }
     req.user = user;
+    next();
   });
-
-  next();
 };
 
 module.exports = auth;

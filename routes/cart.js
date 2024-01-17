@@ -12,7 +12,6 @@ const {
 
 //GET all Carts
 router.get("/", authProtect, async (req, res) => {
-  if (!req.user) return;
   try {
     const carts = await prisma.cart.findMany({
       where: {
@@ -45,7 +44,6 @@ router.get("/", authProtect, async (req, res) => {
 
 //POST a product to cart
 router.post("/", authProtect, async (req, res) => {
-  if (!req.user) return;
   const { productId, quantity } = req.body;
   try {
     const addcart = await prisma.cart.update({
@@ -133,7 +131,6 @@ router.post("/", authProtect, async (req, res) => {
 
 //PUT a product to cart
 router.put("/:prodId", authProtect, async (req, res) => {
-  if (!req.user) return;
   const theid = parseInt(req.params.prodId);
   const { quantity } = req.body;
   try {
@@ -221,7 +218,6 @@ router.put("/:prodId", authProtect, async (req, res) => {
 
 //DELETE a product from cart
 router.delete("/:prodId", authProtect, async (req, res) => {
-  if (!req.user) return;
   const theid = parseInt(req.params.prodId);
   try {
     //get cart id
