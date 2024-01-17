@@ -26,6 +26,7 @@ model User {
   cart Cart?
   saveditem SavedItem?
   ratingreviews Ratingreview[]
+  checkout Checkout?
 
   @@map("users")
 }
@@ -34,7 +35,7 @@ model Product {
   id Int @id @default(autoincrement())
   productname String
   brandname String
-  price String
+  price Int?
   rating Int?
   featuredproduct Boolean @default(false)
   quantity Int
@@ -51,6 +52,7 @@ model Product {
   orders Order[]
   saveditems SavedItem[]
   ratingreviews Ratingreview[]
+  orderItems OrderItem[]
 
   @@map("products")
 }
@@ -73,28 +75,59 @@ model Brand {
   @@map("brands")
 }
 
-model Order {
+model OrderItem {
   id Int @id @default(autoincrement())
-  ordernumber Int @unique
+  quantity Int
+  Amount Int
+  TotalAmount Int
+  createdAt DateTime @default(now())
+
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+  orderId String
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("orderitems")
+}
+
+model Order {
+  id String @id @default(uuid())
   itemnumber Int
-  totalprice String
-  paymentmethod String
-  deliverymethod String
-  deliveryfee String
-  shippedaddress String
+  totalprice Int
+  transactionstatus String @default("pending")
+  paymentmethod String @default("Flutterwave")
+  deliverymethod String @default("Door Delivery")
+  shippedaddress String @default("")
   createdAt DateTime @default(now())
 
   products Product[]
   userId Int
   user User @relation(fields: [userId],references: [id])
+  orderItems OrderItem[]
 
   @@map("orders")
 }
 
+model Checkout {
+  id Int @id @default(autoincrement())
+  subtotal Int @default(0)
+  taxcharge Int @default(0)
+  discount Int @default(0)
+  deliveryfee Int @default(0)
+  totalamount Int @default(0)
+  itemtotal Int @default(0)
+
+  userId Int @unique
+  user User @relation(fields: [userId],references: [id])
+
+  @@map("checkouts")
+}
+
 model Cart {
   id Int @id @default(autoincrement())
+  carttotal Int @default(0)
 
-  products CartOnProduct[]
+  cartonproducts CartOnProduct[]
   userId Int @unique
   user User @relation(fields: [userId],references: [id])
 

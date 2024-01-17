@@ -19,7 +19,7 @@ router.get("/", authProtect, async (req, res) => {
         userId: req.user.sub,
       },
       include: {
-        products: {
+        cartonproducts: {
           include: {
             product: true,
           },
@@ -33,7 +33,13 @@ router.get("/", authProtect, async (req, res) => {
     }
     res.json(carts);
   } catch (error) {
-    res.status(400).send("An error occured");
+    if (error instanceof PrismaClientValidationError) {
+      res.status(400).send(error.message);
+    } else if (error instanceof PrismaClientUnknownRequestError) {
+      res.status(400).send(error.message);
+    } else {
+      res.status(400).send(error);
+    }
   }
 });
 
@@ -42,12 +48,12 @@ router.post("/", authProtect, async (req, res) => {
   if (!req.user) return;
   const { productId, quantity } = req.body;
   try {
-    const acart = await prisma.cart.update({
+    const addcart = await prisma.cart.update({
       where: {
         userId: req.user.sub,
       },
       data: {
-        products: {
+        cartonproducts: {
           create: [
             {
               productId,
@@ -56,9 +62,66 @@ router.post("/", authProtect, async (req, res) => {
           ],
         },
       },
-      include: { products: true },
     });
-    return res.json(acart);
+    //calculate the total cart price and tax charge
+    const cartItems = await prisma.cartOnProduct.findMany({
+      where: {
+        cartId: addcart.id,
+      },
+      select: {
+        quantity: true,
+        product: {
+          select: {
+            price: true,
+          },
+        },
+      },
+    });
+
+    let totally = cartItems.reduce((accumulate, cartItem) => {
+      return (
+        accumulate +
+        parseInt(parseInt(cartItem.product.price) * cartItem.quantity)
+      );
+    }, 0);
+    // console.log("got here", totally);
+
+    const acart = await prisma.cart.update({
+      where: {
+        id: addcart.id,
+      },
+      data: {
+        carttotal: parseInt(totally),
+      },
+    });
+
+    let chargedtax = (parseInt(totally) * 5) / 100;
+
+    let noOfItem = cartItems.reduce((acc, cartItem) => {
+      return acc + cartItem.quantity;
+    }, 0);
+
+    let deliveryamount = 3000;
+
+    let totalprice = parseInt(totally + chargedtax + deliveryamount);
+
+    await prisma.checkout.update({
+      where: {
+        userId: req.user.sub,
+      },
+      data: {
+        subtotal: parseInt(totally),
+        taxcharge: chargedtax,
+        deliveryfee: deliveryamount,
+        itemtotal: noOfItem,
+        totalamount: totalprice,
+      },
+    });
+
+    return res.json({
+      msg: "Product added to cart",
+      acart,
+    });
   } catch (error) {
     if (error instanceof PrismaClientValidationError) {
       res.status(400).send(error.message);
@@ -98,6 +161,52 @@ router.put("/:prodId", authProtect, async (req, res) => {
         quantity,
       },
     });
+
+    //calculate the total cart price and tax charge
+    const cartItems = await prisma.cartOnProduct.findMany({
+      where: {
+        cartId: thecart.id,
+      },
+      select: {
+        quantity: true,
+        product: {
+          select: {
+            price: true,
+          },
+        },
+      },
+    });
+
+    let totally = cartItems.reduce((accumulate, cartItem) => {
+      return (
+        accumulate +
+        parseInt(parseInt(cartItem.product.price) * cartItem.quantity)
+      );
+    }, 0);
+
+    let chargedtax = (parseInt(totally) * 5) / 100;
+
+    let noOfItem = cartItems.reduce((acc, cartItem) => {
+      return acc + cartItem.quantity;
+    }, 0);
+
+    let deliveryamount = 3000;
+
+    let totalprice = parseInt(totally + chargedtax + deliveryamount);
+
+    await prisma.checkout.update({
+      where: {
+        userId: req.user.sub,
+      },
+      data: {
+        subtotal: parseInt(totally),
+        taxcharge: chargedtax,
+        deliveryfee: deliveryamount,
+        itemtotal: noOfItem,
+        totalamount: totalprice,
+      },
+    });
+
     return res.status(200).json({ message: "Quantity updated successfully" });
   } catch (error) {
     if (error instanceof PrismaClientValidationError) {
@@ -136,6 +245,52 @@ router.delete("/:prodId", authProtect, async (req, res) => {
         id: cartProduct.id,
       },
     });
+
+    //calculate the total cart price and tax charge
+    const cartItems = await prisma.cartOnProduct.findMany({
+      where: {
+        cartId: thecart.id,
+      },
+      select: {
+        quantity: true,
+        product: {
+          select: {
+            price: true,
+          },
+        },
+      },
+    });
+
+    let totally = cartItems.reduce((accumulate, cartItem) => {
+      return (
+        accumulate +
+        parseInt(parseInt(cartItem.product.price) * cartItem.quantity)
+      );
+    }, 0);
+
+    let chargedtax = (parseInt(totally) * 5) / 100;
+
+    let noOfItem = cartItems.reduce((acc, cartItem) => {
+      return acc + cartItem.quantity;
+    }, 0);
+
+    let deliveryamount = 3000;
+
+    let totalprice = parseInt(totally + chargedtax + deliveryamount);
+
+    await prisma.checkout.update({
+      where: {
+        userId: req.user.sub,
+      },
+      data: {
+        subtotal: parseInt(totally),
+        taxcharge: chargedtax,
+        deliveryfee: deliveryamount,
+        itemtotal: noOfItem,
+        totalamount: totalprice,
+      },
+    });
+
     return res
       .status(200)
       .json({ message: "Product removed from cart successfully" });

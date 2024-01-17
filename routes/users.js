@@ -40,7 +40,12 @@ router.post("/", async (req, res) => {
       const addUser = await prisma.user.create({
         data: { email, password: pwdHash },
       });
+      //creat cart for user upon sign up
       await prisma.cart.create({
+        data: { userId: addUser.id },
+      });
+      //create checkout for user upon sign up
+      await prisma.checkout.create({
         data: { userId: addUser.id },
       });
       return res.json(addUser);
