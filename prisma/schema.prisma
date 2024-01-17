@@ -35,7 +35,7 @@ model Product {
   id Int @id @default(autoincrement())
   productname String
   brandname String
-  price Int?
+  price Int
   rating Int?
   featuredproduct Boolean @default(false)
   quantity Int
