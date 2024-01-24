@@ -26,7 +26,7 @@ console.log("Direct NODE_ENV", process.env.NODE_ENV);
 console.log("app.get", app.get("env"));
 console.log("App Secret", config.get("Appname"));
 
-const port = process.env.PORT || 5001;
+const port = config.get("PORT");
 app.listen(port, () =>
   console.log("> Server is up and running on port : " + port)
 );
