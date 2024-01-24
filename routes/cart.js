@@ -1,17 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const authProtect = require("../middleware/auth");
-const authAdmin = require("../middleware/authAdmin");
+// const authAdmin = require("../middleware/authAdmin");
 const { PrismaClient } = require("@prisma/client");
-const auth = require("../middleware/auth");
 const prisma = new PrismaClient();
-const {
-  PrismaClientValidationError,
-  PrismaClientUnknownRequestError,
-} = require("@prisma/client/runtime/library");
 
 //GET all Carts
-router.get("/", authProtect, async (req, res) => {
+router.get("/", authProtect, async (req, res, next) => {
   try {
     const carts = await prisma.cart.findMany({
       where: {
@@ -32,18 +27,12 @@ router.get("/", authProtect, async (req, res) => {
     }
     res.json(carts);
   } catch (error) {
-    if (error instanceof PrismaClientValidationError) {
-      res.status(400).send(error.message);
-    } else if (error instanceof PrismaClientUnknownRequestError) {
-      res.status(400).send(error.message);
-    } else {
-      res.status(400).send(error);
-    }
+    next(error);
   }
 });
 
 //POST a product to cart
-router.post("/", authProtect, async (req, res) => {
+router.post("/", authProtect, async (req, res, next) => {
   const { productId, quantity } = req.body;
   try {
     const addcart = await prisma.cart.update({
@@ -121,16 +110,12 @@ router.post("/", authProtect, async (req, res) => {
       acart,
     });
   } catch (error) {
-    if (error instanceof PrismaClientValidationError) {
-      res.status(400).send(error.message);
-    } else {
-      res.status(400).send(error);
-    }
+    next(error);
   }
 });
 
 //PUT a product to cart
-router.put("/:prodId", authProtect, async (req, res) => {
+router.put("/:prodId", authProtect, async (req, res, next) => {
   const theid = parseInt(req.params.prodId);
   const { quantity } = req.body;
   try {
@@ -206,18 +191,12 @@ router.put("/:prodId", authProtect, async (req, res) => {
 
     return res.status(200).json({ message: "Quantity updated successfully" });
   } catch (error) {
-    if (error instanceof PrismaClientValidationError) {
-      res.status(400).send(error.message);
-    } else if (error instanceof PrismaClientUnknownRequestError) {
-      res.status(400).send(error.message);
-    } else {
-      res.status(400).send(error);
-    }
+    next(error);
   }
 });
 
 //DELETE a product from cart
-router.delete("/:prodId", authProtect, async (req, res) => {
+router.delete("/:prodId", authProtect, async (req, res, next) => {
   const theid = parseInt(req.params.prodId);
   try {
     //get cart id
@@ -291,13 +270,7 @@ router.delete("/:prodId", authProtect, async (req, res) => {
       .status(200)
       .json({ message: "Product removed from cart successfully" });
   } catch (error) {
-    if (error instanceof PrismaClientValidationError) {
-      res.status(400).send(error.message);
-    } else if (error instanceof PrismaClientUnknownRequestError) {
-      res.status(400).send(error.message);
-    } else {
-      res.status(400).send(error);
-    }
+    next(error);
   }
 });
 

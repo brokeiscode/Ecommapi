@@ -3,13 +3,9 @@ const router = express.Router();
 const authProtect = require("../middleware/auth");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const {
-  PrismaClientValidationError,
-  PrismaClientUnknownRequestError,
-} = require("@prisma/client/runtime/library");
 
 //GET checkout
-router.get("/", authProtect, async (req, res) => {
+router.get("/", authProtect, async (req, res, next) => {
   try {
     const checkout = await prisma.checkout.findUnique({
       where: {
@@ -23,7 +19,7 @@ router.get("/", authProtect, async (req, res) => {
     }
     res.json(checkout);
   } catch (error) {
-    res.status(400).send("An error occured");
+    next(error);
   }
 });
 

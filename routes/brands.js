@@ -6,7 +6,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 //GET all Brand
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const brands = await prisma.brand.findMany({
       include: {
@@ -20,12 +20,12 @@ router.get("/", async (req, res) => {
     }
     res.json(brands);
   } catch (error) {
-    res.status(400).send("An error occured");
+    next(error);
   }
 });
 
 //GET one Category
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res, next) => {
   const theid = parseInt(req.params.id);
   try {
     const abrand = await prisma.brand.findUnique({
@@ -43,15 +43,12 @@ router.get("/:id", async (req, res) => {
     }
     return res.json(abrand);
   } catch (error) {
-    return res.status(400).json({
-      msg: "Something went wrong",
-      error,
-    });
+    next(error);
   }
 });
 
 //POST many brands
-router.post("/many/", [authProtect, authAdmin], async (req, res) => {
+router.post("/many/", [authProtect, authAdmin], async (req, res, next) => {
   const { brandsData } = req.body;
   try {
     const manybrands = await prisma.brand.createMany({
@@ -62,10 +59,7 @@ router.post("/many/", [authProtect, authAdmin], async (req, res) => {
     });
     return res.json(manybrands);
   } catch (error) {
-    return res.status(400).json({
-      msg: "Something went wrong",
-      error,
-    });
+    next(error);
   }
 });
 

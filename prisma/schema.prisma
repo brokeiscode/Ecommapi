@@ -19,6 +19,10 @@ model User {
   firstName String?
   lastName String?
   mobile String?
+  emailVerified Boolean @default(false)
+  currentOTP String?
+  avatar String @default("static/defaultavatar/1706116009005-blankavatar.png")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -27,8 +31,24 @@ model User {
   saveditem SavedItem?
   ratingreviews Ratingreview[]
   checkout Checkout?
+  shippingaddress ShippingAddress[]
 
   @@map("users")
+}
+
+model ShippingAddress {
+  id Int @id @default(autoincrement())
+  addressLineOne String
+  addressLineTwo String?
+  city String
+  state String
+  country String
+  zipcode Int
+
+  userId Int
+  user User @relation(fields: [userId],references: [id])
+
+  @@map("shippingaddresses")
 }
 
 model Product {
@@ -40,7 +60,7 @@ model Product {
   featuredproduct Boolean @default(false)
   quantity Int
   itembuy Int @default(1)
-  image String
+  image String?
   description String
   incarted Boolean @default(false)
 

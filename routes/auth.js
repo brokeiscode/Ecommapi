@@ -8,7 +8,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 //login we use post
-router.post("/", async (req, res) => {
+router.post("/", async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await prisma.user.findUnique({
@@ -44,7 +44,7 @@ router.post("/", async (req, res) => {
       access_token: token,
     });
   } catch (error) {
-    return res.status(400).send(`error occurred: ${error}`);
+    next(error);
   }
 });
 

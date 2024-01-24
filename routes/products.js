@@ -2,11 +2,25 @@ const express = require("express");
 const router = express.Router();
 const authProtect = require("../middleware/auth");
 const authAdmin = require("../middleware/authAdmin");
+const multer = require("multer");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+//Setting up Multer - Multer storage configuration
+const storageforproduct = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/productpicture"); //Destination folder for uploaded files
+  },
+  filename: function (req, file, cb) {
+    //use a unique filename for the uploaded file
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const uploadforproduct = multer({ storage: storageforproduct });
+
 //GET all Products
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
     const products = await prisma.product.findMany({});
     if (!products) {
@@ -16,12 +30,12 @@ router.get("/", async (req, res) => {
     }
     res.json(products);
   } catch (error) {
-    res.status(400).send("An error occured");
+    next(error);
   }
 });
 
 //GET a product
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req, res, next) => {
   const theid = parseInt(req.params.id);
   try {
     const aproducts = await prisma.product.findUnique({
@@ -36,12 +50,38 @@ router.get("/:id", async (req, res) => {
     }
     res.json(aproducts);
   } catch (error) {
-    res.status(400).send("An error occured");
+    next(error);
   }
 });
 
+//post an product picture
+router.post(
+  "/upload-productpicture/:id",
+  // [authProtect],
+  uploadforproduct.single("productpicture"),
+  async (req, res, next) => {
+    try {
+      const theid = parseInt(req.params.id);
+      const { filename } = req.file;
+      // update user avatar
+      // console.log("the upload", req.file);
+      const aproduct = await prisma.product.update({
+        where: {
+          id: theid,
+        },
+        data: {
+          image: `static/productpicture/${filename}`,
+        },
+      });
+      return res.send({ msg: "Product picture uploaded sucessfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 //POST a product
-router.post("/single/", [authProtect, authAdmin], async (req, res) => {
+router.post("/single/", [authProtect, authAdmin], async (req, res, next) => {
   const {
     productname,
     brandname,
@@ -70,15 +110,12 @@ router.post("/single/", [authProtect, authAdmin], async (req, res) => {
     // console.log(req.user);
     return res.json(aproduct);
   } catch (error) {
-    return res.status(400).json({
-      msg: "Something went wrong",
-      error,
-    });
+    next(error);
   }
 });
 
 //POST many product
-router.post("/many/", [authProtect, authAdmin], async (req, res) => {
+router.post("/many/", [authProtect, authAdmin], async (req, res, next) => {
   const { productsData } = req.body;
   try {
     const manyproduct = await prisma.product.createMany({
@@ -96,10 +133,7 @@ router.post("/many/", [authProtect, authAdmin], async (req, res) => {
     });
     return res.json(manyproduct);
   } catch (error) {
-    return res.status(400).json({
-      msg: "Something went wrong",
-      error,
-    });
+    next(error);
   }
 });
 

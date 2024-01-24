@@ -3,13 +3,9 @@ const router = express.Router();
 const authProtect = require("../middleware/auth");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const {
-  PrismaClientValidationError,
-  PrismaClientUnknownRequestError,
-} = require("@prisma/client/runtime/library");
 
 //GET all orders
-router.get("/allsuccessfulorder/", authProtect, async (req, res) => {
+router.get("/allsuccessfulorder/", authProtect, async (req, res, next) => {
   try {
     const orders = await prisma.order.findMany({
       where: {
@@ -30,11 +26,11 @@ router.get("/allsuccessfulorder/", authProtect, async (req, res) => {
     }
     res.json(orders);
   } catch (error) {
-    res.status(400).send("An error occured");
+    next(error);
   }
 });
 
-router.post("/pendingorder/", authProtect, async (req, res) => {
+router.post("/pendingorder/", authProtect, async (req, res, next) => {
   const {} = req.body;
   try {
     const acart = await prisma.cart.findUnique({
@@ -88,11 +84,7 @@ router.post("/pendingorder/", authProtect, async (req, res) => {
       msg: "An Order has been Created",
     });
   } catch (error) {
-    if (error instanceof PrismaClientValidationError) {
-      res.status(400).send(error.message);
-    } else {
-      res.status(400).send(error);
-    }
+    next(error);
   }
 });
 
