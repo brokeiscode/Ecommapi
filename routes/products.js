@@ -1,23 +1,12 @@
 const express = require("express");
 const router = express.Router();
+// const processFile = require("../middleware/uploadMulter");
+// const { format } = require("util");
+// const { Storage } = require("@google-cloud/storage");
 const authProtect = require("../middleware/auth");
 const authAdmin = require("../middleware/authAdmin");
-const multer = require("multer");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
-//Setting up Multer - Multer storage configuration
-const storageforproduct = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/productpicture"); //Destination folder for uploaded files
-  },
-  filename: function (req, file, cb) {
-    //use a unique filename for the uploaded file
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-const uploadforproduct = multer({ storage: storageforproduct });
 
 //GET all Products
 router.get("/", async (req, res, next) => {
@@ -53,32 +42,6 @@ router.get("/:id", async (req, res, next) => {
     next(error);
   }
 });
-
-//post an product picture
-router.post(
-  "/upload-productpicture/:id",
-  // [authProtect],
-  uploadforproduct.single("productpicture"),
-  async (req, res, next) => {
-    try {
-      const theid = parseInt(req.params.id);
-      const { filename } = req.file;
-      // update user avatar
-      // console.log("the upload", req.file);
-      const aproduct = await prisma.product.update({
-        where: {
-          id: theid,
-        },
-        data: {
-          image: `static/productpicture/${filename}`,
-        },
-      });
-      return res.send({ msg: "Product picture uploaded sucessfully" });
-    } catch (error) {
-      next(error);
-    }
-  }
-);
 
 //POST a product
 router.post("/single/", [authProtect, authAdmin], async (req, res, next) => {
@@ -125,7 +88,6 @@ router.post("/many/", [authProtect, authAdmin], async (req, res, next) => {
         price: item.price,
         rating: item.rating,
         quantity: item.quantity,
-        image: item.image,
         description: item.description,
         categoryId: item.categoryId,
         brandId: item.brandId,

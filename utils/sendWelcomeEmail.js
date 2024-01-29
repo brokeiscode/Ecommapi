@@ -4,7 +4,7 @@ const config = require("config");
 const fs = require("fs");
 const { error, log } = require("console");
 
-const sendSignUpEmail = async (recipientEmail, newOTP) => {
+const sendWelcomeEmail = async (recipientEmail) => {
   //Sending Email
   const transporter = nodemailer.createTransport({
     host: "mail.privateemail.com",
@@ -17,14 +17,13 @@ const sendSignUpEmail = async (recipientEmail, newOTP) => {
   });
 
   const emailTemplateFile = fs.readFileSync(
-    "emailtemplates/signupotp.html",
+    "emailtemplates/emailverified.html",
     "utf8"
   );
 
   const template = handlebars.compile(emailTemplateFile);
   const replacements = {
     email: recipientEmail,
-    otp: newOTP,
   };
 
   const emailHtml = template(replacements);
@@ -46,4 +45,4 @@ const sendSignUpEmail = async (recipientEmail, newOTP) => {
   });
 };
 
-module.exports = sendSignUpEmail;
+module.exports = sendWelcomeEmail;

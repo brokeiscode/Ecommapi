@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mailer = require("../utils/sendEmail");
+const welcomeMailer = require("../utils/sendWelcomeEmail");
 const authProtect = require("../middleware/auth");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -49,7 +50,7 @@ router.post("/verify-otp", authProtect, async (req, res, next) => {
     }
     //verify OTP
     if (collectedotp === auser.currentOTP) {
-      await prisma.user.update({
+      const verifieduser = await prisma.user.update({
         where: {
           id: auser.id,
         },
@@ -57,6 +58,8 @@ router.post("/verify-otp", authProtect, async (req, res, next) => {
           emailVerified: true,
         },
       });
+      //Send email
+      welcomeMailer(verifieduser.email);
       return res.json({ msg: "Email Verified via OTP" });
     } else {
       return res.status(401).json({ msg: "Invalid OTP, try again" });

@@ -10,11 +10,13 @@ const cart = require("./routes/cart");
 const checkout = require("./routes/checkout");
 const order = require("./routes/orders");
 const otp = require("./routes/otp");
+const uploads = require("./routes/uploads");
 const config = require("config");
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); //body parser
+app.use(express.urlencoded({ extended: true }));
 app.use("/static", express.static("public"));
 
 app.use("/products", products);
@@ -26,6 +28,7 @@ app.use("/cart", cart);
 app.use("/checkout", checkout);
 app.use("/order", order);
 app.use("/otp", otp);
+app.use("/uploads", uploads);
 
 app.use(error);
 

@@ -21,7 +21,7 @@ model User {
   mobile String?
   emailVerified Boolean @default(false)
   currentOTP String?
-  avatar String @default("static/defaultavatar/1706116009005-blankavatar.png")
+  avatar String @default("https://storage.googleapis.com/cloudsavedfile.uptuned.shop/blankavatar.png")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
