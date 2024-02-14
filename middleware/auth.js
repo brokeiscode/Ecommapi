@@ -6,12 +6,12 @@ const auth = (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).send("Denied access. You need to login");
+    return res.status(401).send({ msg: "Denied access. You need to login" });
   }
 
   jwt.verify(token, config.get("jwtSecret"), (err, user) => {
     if (err) {
-      return res.status(401).send("Invalid token. You need to login");
+      return res.status(401).send({ msg: "Invalid token. You need to login" });
     }
     req.user = user;
     next();

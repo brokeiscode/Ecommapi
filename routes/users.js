@@ -83,11 +83,15 @@ router.post("/", async (req, res, next) => {
   });
 
   if (valResult.error) {
-    return res.send(valResult.error.details);
+    // return res.send(valResult.error.details);
+    return res.status(400).send({ msg: "Check email entered and try again" });
   } else {
     const pwdResult = userPwdSchema.pwdVal.validate(req.body.password);
     if (pwdResult.error) {
-      return res.send(pwdResult.error.details);
+      // return res.send(pwdResult.error.details);
+      return res
+        .status(400)
+        .send({ msg: "Password does not match validation. Try again" });
     }
     const { email, password } = req.body;
     try {
@@ -97,9 +101,9 @@ router.post("/", async (req, res, next) => {
         },
       });
       if (user)
-        return res
-          .status(400)
-          .send("The email is already registered, please login if this is you");
+        return res.status(400).send({
+          msg: "The email is already registered, please login if this is you",
+        });
 
       const pwdHash = await argon.hash(password);
 
@@ -116,7 +120,7 @@ router.post("/", async (req, res, next) => {
       });
 
       return res.json({
-        msg: "New User registered, Please Log In",
+        msg: "New User registered, Signing In",
       });
     } catch (error) {
       next(error);

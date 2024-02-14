@@ -11,6 +11,8 @@ const checkout = require("./routes/checkout");
 const order = require("./routes/orders");
 const otp = require("./routes/otp");
 const uploads = require("./routes/uploads");
+const profile = require("./routes/profile");
+const payment = require("./routes/payment");
 const config = require("config");
 const app = express();
 
@@ -29,6 +31,8 @@ app.use("/checkout", checkout);
 app.use("/order", order);
 app.use("/otp", otp);
 app.use("/uploads", uploads);
+app.use("/profile", profile);
+app.use("/payment", payment);
 
 app.use(error);
 

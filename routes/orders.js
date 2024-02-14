@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authProtect = require("../middleware/auth");
+// const paymentgateway = require("../utils/paystackCall");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -80,8 +81,10 @@ router.post("/pendingorder/", authProtect, async (req, res, next) => {
         orderItems: true,
       },
     });
+    // paymentgateway(aorder.id, req.user);
     return res.json({
       msg: "An Order has been Created",
+      aorder,
     });
   } catch (error) {
     next(error);

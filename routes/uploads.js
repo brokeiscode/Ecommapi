@@ -51,6 +51,26 @@ router.post(
   async (req, res, next) => {
     try {
       const theid = parseInt(req.params.id);
+      //check if product image is default or not
+      const productImage = await prisma.product.findUnique({
+        where: {
+          id: theid,
+        },
+        select: {
+          image: true,
+        },
+      });
+      if (!productImage) {
+        return res.status(400).send({
+          message:
+            "Product not found. Please check if product exist in the database first",
+        });
+      } else if (productImage !== null) {
+        return res.status(400).send({
+          message: "Product has an Image. To update image, click below!",
+        });
+      }
+
       const file = req.file;
       //   console.log("please na", file);
       if (!file) {

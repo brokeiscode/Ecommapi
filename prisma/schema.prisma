@@ -43,7 +43,7 @@ model ShippingAddress {
   city String
   state String
   country String
-  zipcode Int
+  zipcode String
 
   userId Int
   user User @relation(fields: [userId],references: [id])
@@ -109,14 +109,15 @@ model OrderItem {
 }
 
 model Order {
-  id String @id @default(uuid())
+  id String @id @default(cuid())
   itemnumber Int
   totalprice Int
   transactionstatus String @default("pending")
-  paymentmethod String @default("Flutterwave")
+  paymentmethod String @default("Paystack")
   deliverymethod String @default("Door Delivery")
   shippedaddress String @default("")
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   products Product[]
   userId Int

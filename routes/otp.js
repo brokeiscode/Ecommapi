@@ -26,7 +26,7 @@ router.post("/generate-otp", authProtect, async (req, res, next) => {
     mailer(auser.email, otp);
     return res.json({
       msg: "OTP generated and sent successfully",
-      otp: auser.currentOTP,
+      // otp: auser.currentOTP,
     });
   } catch (error) {
     next(error);
@@ -60,7 +60,10 @@ router.post("/verify-otp", authProtect, async (req, res, next) => {
       });
       //Send email
       welcomeMailer(verifieduser.email);
-      return res.json({ msg: "Email Verified via OTP" });
+      return res.json({
+        msg: "Email Verified via OTP",
+        emailVerify: verifieduser.emailVerified,
+      });
     } else {
       return res.status(401).json({ msg: "Invalid OTP, try again" });
     }
