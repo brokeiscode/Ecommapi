@@ -192,7 +192,7 @@ router.post("/addproduct", authProtect, async (req, res, next) => {
     return res.json({
       // msg: "Product added to cart",
       // carttotal: acart.carttotal,
-      msg: "All local cart moved to Cart",
+      msg: "A product added to Cart",
       thecheckout: {
         deliveryfee: thecheckout.deliveryfee,
         discount: thecheckout.discount,

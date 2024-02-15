@@ -28,8 +28,8 @@ router.post("/charge-pending-order", [authProtect], async (req, res, next) => {
       amount: `${pendingorder.totalprice * 100}`,
       currency: `NGN`,
       reference: pendingorder.id,
-      callback_url: "https://www.uptuned.shop",
-      channels: ["card", "bank", "ussd"],
+      // callback_url: "https://www.uptuned.shop",
+      // channels: ["card", "bank", "ussd"],
     };
 
     const response = await fetch(paystackEndpoint, {
