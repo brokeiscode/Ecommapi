@@ -103,19 +103,48 @@ router.post("/my/webhook/url", async function (req, res) {
       switch (event) {
         case "charge.success":
           // Payment was successful
-          console.log("Payment successful:", payLoad.data);
+          console.log("Payment successful");
           // Update your database, send confirmation emails, etc.
-
+          if (
+            payLoad.data.status === "success" &&
+            payLoad.data.amount >= theorder.totalprice * 100
+          ) {
+            //successful payment
+            await prisma.order.update({
+              where: {
+                id: parseInt(payLoad.data.reference),
+              },
+              data: {
+                transactionstatus: "success",
+              },
+            });
+          }
           break;
-        case "charge.failed":
+        case "transfer.failed":
           // Payment failed
-          console.log("Payment failed:", body.data);
+          console.log("Payment failed");
           // Handle failed payment scenario
+          await prisma.order.update({
+            where: {
+              id: parseInt(payLoad.data.reference),
+            },
+            data: {
+              transactionstatus: "Failed",
+            },
+          });
           break;
         case "transfer.success":
           // Transfer was successful
-          console.log("Transfer successful:", body.data);
+          console.log("Transfer successful");
           // Handle successful transfer scenario
+          await prisma.order.update({
+            where: {
+              id: parseInt(payLoad.data.reference),
+            },
+            data: {
+              transactionstatus: "success",
+            },
+          });
           break;
         // Add more cases for other event types as needed
         default:
@@ -127,29 +156,11 @@ router.post("/my/webhook/url", async function (req, res) {
       console.error("Invalid webhook signature");
       return res.status(400).json({ msg: "Invalid signature" });
     }
-
-    //verify payment
-    // const response = await fetch(
-    //   `https://api.paystack.co/transaction/verify/${payLoad.data.reference}`,
-    //   {
-    //     method: "GET",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${paystackSecretApikey}`,
-    //     },
-    //   }
-    // );
-
-    // if (!response.ok) {
-    //   return res.status(400).send(`HTTP error! status: ${response.status}`);
-    // }
-
-    // const verifiedData = await response.json();
   } catch (error) {
     console.error("Error verifying webhook signature", error);
     return res.status(500).json({ msg: "Error verifying signature" });
   }
-  res.send(200);
+  res.sendStatus(200);
 });
 
 module.exports = router;
