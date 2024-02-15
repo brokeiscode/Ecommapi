@@ -112,7 +112,7 @@ router.post("/my/webhook/url", async function (req, res) {
             //successful payment
             await prisma.order.update({
               where: {
-                id: parseInt(payLoad.data.reference),
+                id: payLoad.data.reference,
               },
               data: {
                 transactionstatus: "success",
@@ -126,7 +126,7 @@ router.post("/my/webhook/url", async function (req, res) {
           // Handle failed payment scenario
           await prisma.order.update({
             where: {
-              id: parseInt(payLoad.data.reference),
+              id: payLoad.data.reference,
             },
             data: {
               transactionstatus: "Failed",
@@ -139,7 +139,7 @@ router.post("/my/webhook/url", async function (req, res) {
           // Handle successful transfer scenario
           await prisma.order.update({
             where: {
-              id: parseInt(payLoad.data.reference),
+              id: payLoad.data.reference,
             },
             data: {
               transactionstatus: "success",
