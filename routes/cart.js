@@ -56,19 +56,6 @@ router.get("/", authProtect, async (req, res, next) => {
           description: product.description,
         })),
       },
-      // carttotal: carts.carttotal,
-      // // cartlisted: carts.cartonproducts,
-      // cartlist: carts.cartonproducts.map(({ product, quantity }) => ({
-      //   id: product.id,
-      //   productname: product.productname,
-      //   brandname: product.brandname,
-      //   price: product.price,
-      //   rating: product.rating,
-      //   featuredproduct: product.featuredproduct,
-      //   itembuy: quantity,
-      //   image: product.image,
-      //   description: product.description,
-      // })),
     });
   } catch (error) {
     next(error);
@@ -102,24 +89,7 @@ router.post("/addproduct", authProtect, async (req, res, next) => {
         },
       },
     });
-    // }
-    // const { productId, quantity } = req.body;
-    // try {
-    //   const addcart = await prisma.cart.update({
-    //     where: {
-    //       userId: req.user.sub,
-    //     },
-    //     data: {
-    //       cartonproducts: {
-    //         create: [
-    //           {
-    //             productId,
-    //             quantity,
-    //           },
-    //         ],
-    //       },
-    //     },
-    //   });
+
     //calculate the total cart price and tax charge
     const cartItems = await prisma.cartOnProduct.findMany({
       where: {
@@ -250,38 +220,7 @@ router.post("/cart-move-cloud", authProtect, async (req, res, next) => {
         },
       });
     }
-    // const findcart = await prisma.cart.findUnique({
-    //   where: {
-    //     userId: parseInt(req.user.sub),
-    //   },
-    // });
-    // const addcart = await prisma.cartOnProduct.createMany({
-    //   data: { cartData, cartId: findcart.id },
-    // });
-    // console.log("got here", cartData);
-    // const addcart = await prisma.cart.update({
-    //   where: {
-    //     userId: parseInt(req.user.sub),
-    //   },
-    //   data: {
-    //     cartonproducts: {
-    //       create: cartData.map((item) => ({
-    //         productId: parseInt(item.id),
-    //         quantity: parseInt(item.itembuy),
-    //       })),
-    //     },
-    //   },
-    // });
-    // cartData.map((item) => ({
-    //   cartonproducts: {
-    //     create: [
-    //       {
-    //         productId: parseInt(item.id),
-    //         quantity: parseInt(item.quantity),
-    //       },
-    //     ],
-    //   },
-    // })),
+
     //calculate the total cart price and tax charge
     const cartItems = await prisma.cartOnProduct.findMany({
       where: {
@@ -337,6 +276,22 @@ router.post("/cart-move-cloud", authProtect, async (req, res, next) => {
       },
     });
 
+    const auser = await prisma.user.findUnique({
+      where: {
+        id: parseInt(req.user.sub),
+      },
+    });
+    if (!auser) {
+      return res.status(500).json({
+        msg: "user not found",
+      });
+    }
+    const shipping = await prisma.shippingAddress.findFirst({
+      where: {
+        userId: parseInt(req.user.sub),
+      },
+    });
+
     return res.json({
       msg: "All local cart moved to Cart",
       thecheckout: {
@@ -346,6 +301,18 @@ router.post("/cart-move-cloud", authProtect, async (req, res, next) => {
         subtotal: thecheckout.subtotal,
         taxcharge: thecheckout.taxcharge,
         totalamount: thecheckout.totalamount,
+      },
+      theuser: {
+        firstName: auser.firstName,
+        lastName: auser.lastName,
+        email: auser.email,
+        mobile: auser.mobile,
+        avatar: auser.avatar,
+        addressLineOne: shipping.addressLineOne,
+        city: shipping.city,
+        state: shipping.state,
+        country: shipping.country,
+        zipcode: shipping.zipcode,
       },
     });
   } catch (error) {

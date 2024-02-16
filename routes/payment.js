@@ -50,7 +50,7 @@ router.post("/charge-pending-order", [authProtect], async (req, res, next) => {
     const data = await response.json();
     console.log(data);
     if (data.status === true) {
-      return res.redirect(data.data.authorization_url);
+      return res.json({ url: data.data.authorization_url });
     }
   } catch (error) {
     next(error);
@@ -162,5 +162,77 @@ router.post("/my/webhook/url", async function (req, res) {
   }
   res.sendStatus(200);
 });
+
+router.get(
+  "/status-confirmation/:reference",
+  [authProtect],
+  async (req, res, next) => {
+    const paystackSecretApikey = config.get("PAYSTACK_SECRET_KEY");
+    const reference = req.params.reference;
+    try {
+      //verify payment
+      const response = await fetch(
+        `https://api.paystack.co/transaction/verify/${reference}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${paystackSecretApikey}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        await prisma.order.update({
+          where: {
+            id: reference,
+          },
+          data: {
+            transactionstatus: "cancelled",
+          },
+        });
+        return res
+          .status(400)
+          .json({
+            msg: "No Paystack reference of this order, Cancelled",
+            status: "failed",
+          });
+      }
+
+      const verifiedData = await response.json();
+      // console.log(verifiedData);
+
+      if (verifiedData.data.status === "success") {
+        await prisma.order.update({
+          where: {
+            id: reference,
+          },
+          data: {
+            transactionstatus: "success",
+          },
+        });
+        return res.json({ status: "success" });
+      } else if (
+        verifiedData.data.status === "ongoing" ||
+        verifiedData.data.status === "pending" ||
+        verifiedData.data.status === "processing"
+      ) {
+        return res.json({ status: "pending" });
+      } else {
+        await prisma.order.update({
+          where: {
+            id: reference,
+          },
+          data: {
+            transactionstatus: "failed",
+          },
+        });
+        return res.json({ status: "failed" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;

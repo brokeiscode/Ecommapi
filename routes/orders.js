@@ -31,6 +31,34 @@ router.get("/allsuccessfulorder/", authProtect, async (req, res, next) => {
   }
 });
 
+//get a particular order
+router.get("/gettingorder/:orderid", authProtect, async (req, res, next) => {
+  const orderID = req.params.orderid;
+  try {
+    const theorder = await prisma.order.findUnique({
+      where: {
+        userId: parseInt(req.user.sub),
+        id: orderID,
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+    if (!theorder) {
+      return res.status(404).json({
+        msg: "No data found. Something is wrong",
+      });
+    }
+    res.json(theorder);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/pendingorder/", authProtect, async (req, res, next) => {
   const {} = req.body;
   try {

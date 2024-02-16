@@ -16,9 +16,6 @@ router.get("/validate-token", [authProtect], async (req, res, next) => {
       where: {
         id: parseInt(req.user.sub),
       },
-      // select: {
-      //   emailVerified: true,
-      // },
     });
     if (!auser) {
       return res.status(500).json({
