@@ -191,12 +191,10 @@ router.get(
             transactionstatus: "cancelled",
           },
         });
-        return res
-          .status(400)
-          .json({
-            msg: "No Paystack reference of this order, Cancelled",
-            status: "failed",
-          });
+        return res.status(400).json({
+          msg: "No Paystack reference of this order, Cancelled",
+          status: "cancelled",
+        });
       }
 
       const verifiedData = await response.json();
@@ -209,6 +207,18 @@ router.get(
           },
           data: {
             transactionstatus: "success",
+          },
+        });
+        //get cart id
+        const thecart = await prisma.cart.findUnique({
+          where: {
+            userId: parseInt(req.user.sub),
+          },
+        });
+        // Check if the product exists in the cart
+        await prisma.cartOnProduct.deleteMany({
+          where: {
+            cartId: thecart.id,
           },
         });
         return res.json({ status: "success" });

@@ -92,11 +92,20 @@ router.post("/pendingorder/", authProtect, async (req, res, next) => {
         userId: parseInt(req.user.sub),
       },
     });
+
+    const address = await prisma.shippingAddress.findFirst({
+      where: {
+        userId: parseInt(req.user.sub),
+      },
+    });
+
+    const shipping = `${address.addressLineOne}, ${address.city}, ${address.state}, ${address.country}, ${address.zipcode}.`;
     //Create Order and OrderItems
     const aorder = await prisma.order.create({
       data: {
         itemnumber: acheckout.itemtotal,
         totalprice: acheckout.totalamount,
+        shippedaddress: shipping,
         userId: acheckout.userId,
         orderItems: {
           create: cartlist.map((acartlist) => ({

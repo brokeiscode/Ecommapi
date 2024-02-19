@@ -23,6 +23,67 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+//GET a search query
+router.get("/search-query", async (req, res, next) => {
+  const { query } = req.query;
+  let Results = [];
+  function splitAndInsert(string) {
+    // Split the string into an array of words
+    var words = string.split(" ");
+
+    // Iterate through each index except the last one
+    for (var i = 0; i < words.length - 1; i++) {
+      // Insert "&" after the current word
+      words.splice(i + 1, 0, "&");
+      // Skip the next word since we just added "&"
+      i++;
+    }
+
+    // Join the words back into a string with spaces
+    var result = words.join(" ");
+
+    return result;
+  }
+
+  const searchQuery = splitAndInsert(query);
+  // console.log(searchQuery);
+
+  try {
+    Results = await prisma.product.findMany({
+      where: {
+        productname: {
+          search: searchQuery,
+          mode: "insensitive", // Set mode to 'insensitive' for case-insensitive search
+        },
+      },
+    });
+
+    res.json(Results);
+    // const products = await prisma.product.findMany({});
+    // if (!products) {
+    //   return res.status(404).json({
+    //     msg: "No data found. Something is wrong",
+    //   });
+    // }
+
+    // let Result = products.filter((product) =>
+    //   product.productname.toLowerCase().includes(query.toLowerCase())
+    // );
+    // if (query !== "") {
+    //   // Split the query string into separate words
+    //   const keywords = query.toLowerCase().split(" ");
+
+    //   // Filter products based on each keyword
+    //   Results = products.filter((product) => {
+    //     const productName = product.productname.toLowerCase();
+    //     return keywords.every((keyword) => productName.includes(keyword));
+    //   });
+    // }
+  } catch (error) {
+    next(error);
+  }
+});
+
 //GET a product
 router.get("/:id", async (req, res, next) => {
   const theid = parseInt(req.params.id);

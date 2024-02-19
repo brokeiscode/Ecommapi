@@ -119,6 +119,10 @@ router.post("/", async (req, res, next) => {
         data: { userId: addUser.id },
       });
 
+      await prisma.shippingAddress.create({
+        data: { userId: addUser.id },
+      });
+
       return res.json({
         msg: "New User registered, Signing In",
       });

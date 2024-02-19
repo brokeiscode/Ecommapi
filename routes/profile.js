@@ -28,18 +28,27 @@ router.post("/profileupdate", authProtect, async (req, res, next) => {
         lastName: lastname,
         mobile: phonenumber,
         shippingaddress: {
-          create: {
-            addressLineOne: addressline,
-            city: cityname,
-            state: statename,
-            country: countryname,
-            zipcode: zipcode,
+          update: {
+            data: {
+              addressLineOne: addressline,
+              city: cityname,
+              state: statename,
+              country: countryname,
+              zipcode: zipcode,
+            },
           },
+          // create: {
+          // addressLineOne: addressline,
+          // city: cityname,
+          // state: statename,
+          // country: countryname,
+          // zipcode: zipcode,
+          // },
         },
       },
     });
 
-    const address = await prisma.shippingAddress.findFirst({
+    const address = await prisma.shippingAddress.findUnique({
       where: {
         userId: theuser.id,
       },
