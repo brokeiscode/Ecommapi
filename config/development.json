@@ -1,0 +1,11 @@
+{
+  "Appname": "Ecommerce Website - Development",
+  "dbURL": {
+    "url": ""
+  },
+  "jwtSecret": "*&)%^$(#^*%$@%&!@&!%#$&(&$*)%$($&&&&&",
+  "PORT": 5001,
+  "email": "noreply@uptuned.shop",
+  "password": "Winner123.",
+  "PAYSTACK_SECRET_KEY": "sk_test_6531539ab278cbaf44601622acd5802069e6cfb4"
+}
